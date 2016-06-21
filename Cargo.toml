@@ -1,0 +1,21 @@
+[package]
+name = "camera"
+version = "0.1.0"
+authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
+
+keywords = ["camera"]
+description = "camera component for scene graph"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/nathanfaucett/rs-camera.git"
+homepage = "https://github.com/nathanfaucett/rs-camera"
+
+
+[dependencies.scene_graph]
+git = "https://github.com/nathanfaucett/rs-scene_graph.git"
+
+[dependencies.transform2d]
+git = "https://github.com/nathanfaucett/rs-transform2d.git"
+
+[dependencies.mat4]
+git = "https://github.com/nathanfaucett/rs-mat4.git"
