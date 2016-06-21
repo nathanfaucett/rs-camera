@@ -1,11 +1,11 @@
 #![no_std]
 
-extern crate camera;
+extern crate camera_component;
 extern crate scene_graph;
 extern crate transform2d;
 
 
-use camera::{Camera, CameraManager};
+use camera_component::{Camera, CameraManager};
 use scene_graph::{Scene, Entity};
 use transform2d::Transform2D;
 
