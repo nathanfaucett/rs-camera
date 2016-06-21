@@ -14,8 +14,8 @@ homepage = "https://github.com/nathanfaucett/rs-camera_component"
 [dependencies.scene_graph]
 git = "https://github.com/nathanfaucett/rs-scene_graph.git"
 
-[dependencies.transform2d]
-git = "https://github.com/nathanfaucett/rs-transform2d.git"
+[dependencies.transform2d_component]
+git = "https://github.com/nathanfaucett/rs-transform2d_component.git"
 
 [dependencies.mat4]
 git = "https://github.com/nathanfaucett/rs-mat4.git"

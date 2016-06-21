@@ -5,7 +5,7 @@ use core::f32::EPSILON;
 use core::f32::consts::PI;
 
 use mat4;
-use transform2d::Transform2D;
+use transform2d_component::Transform2D;
 use scene_graph::{Entity, Component, ComponentManager, Id};
 use camera_manager::CameraManager;
 

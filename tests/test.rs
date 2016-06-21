@@ -2,12 +2,12 @@
 
 extern crate camera_component;
 extern crate scene_graph;
-extern crate transform2d;
+extern crate transform2d_component;
 
 
 use camera_component::{Camera, CameraManager};
 use scene_graph::{Scene, Entity};
-use transform2d::Transform2D;
+use transform2d_component::Transform2D;
 
 
 #[test]
