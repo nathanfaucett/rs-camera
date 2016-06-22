@@ -3,11 +3,12 @@ use collections::boxed::Box;
 use alloc::arc::Arc;
 use core::cell::RefCell;
 
-use scene_graph::{Component, ComponentManager, Id};
+use scene_graph::{Scene, Component, ComponentManager, Id};
 use camera::Camera;
 
 
 struct CameraManagerData {
+    scene: Option<Scene>,
     active_camera: Option<Camera>,
     components: Vec<Camera>,
 }
@@ -23,6 +24,7 @@ impl CameraManager {
     pub fn new() -> CameraManager {
         CameraManager {
             data: Arc::new(RefCell::new(CameraManagerData {
+                scene: None,
                 active_camera: None,
                 components: Vec::new(),
             }))
@@ -51,6 +53,16 @@ impl CameraManager {
 impl ComponentManager for CameraManager {
 
     fn id(&self) -> Id { Id::of::<CameraManager>() }
+
+    fn scene(&self) -> Option<Scene> {
+        match self.data.borrow().scene {
+            Some(ref scene) => Some(scene.clone()),
+            None => None,
+        }
+    }
+    fn set_scene(&self, scene: Option<Scene>) {
+        self.data.borrow_mut().scene = scene;
+    }
 
     fn order(&self) -> usize { 0 }
     fn is_empty(&self) -> bool {
