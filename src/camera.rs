@@ -224,7 +224,7 @@ impl Camera {
         if let Some(entity) = self.entity() {
             if let Some(transform2d) = entity.get_component::<Transform2D>() {
                 let mut data = self.data.borrow_mut();
-                mat4::inverse(&mut data.view, mat4::from_mat32(transform2d.matrix()));
+                mat4::inverse(&mut data.view, &mat4::from_mat32(&transform2d.matrix()));
             }
         }
     }

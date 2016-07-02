@@ -18,7 +18,7 @@ fn test_scene() {
     let transform = Transform2D::new();
 
     camera.set_active();
-    transform.set_position([10f32, 10f32]);
+    transform.set_position(&[10f32, 10f32]);
 
     entity
         .add_component(camera)
