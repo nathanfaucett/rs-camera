@@ -30,15 +30,15 @@ fn test_scene() {
     let entity_camera = camera_manager.active_camera().unwrap();
 
     assert!(entity_camera.view() == [
-        1f32, 0f32, 0f32, -10f32,
-        0f32, 1f32, 0f32, -10f32,
+        1f32, 0f32, 0f32, 0f32,
+        0f32, 1f32, 0f32, 0f32,
         0f32, 0f32, 1f32, 0f32,
-        0f32, 0f32, 0f32, 1f32,
+        -10f32, -10f32, 0f32, 1f32
     ]);
     assert!(entity_camera.projection() == [
         3.1715946f32, 0f32, 0f32, 0f32,
         0f32, 3.1715946f32, 0f32, 0f32,
-        0f32, 0f32, -1f32, -1f32, 0f32,
-        0f32, -0.00000023841858f32, 0f32
+        0f32, 0f32, -1f32, -1f32,
+        0f32, 0f32, -0.00000023841858f32, 0f32
     ]);
 }

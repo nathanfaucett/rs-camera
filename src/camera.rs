@@ -6,6 +6,7 @@ use core::f32::consts::PI;
 
 use mat4;
 use transform2d_component::Transform2D;
+use transform3d_component::Transform3D;
 use scene_graph::{Entity, Component, ComponentManager, Id};
 use camera_manager::CameraManager;
 
@@ -37,6 +38,7 @@ struct CameraData {
 
     projection: [f32; 16],
     view: [f32; 16],
+    world_matrix: [f32; 16],
 
     needs_update: bool,
     active: bool,
@@ -75,9 +77,10 @@ impl Camera {
 
                 projection: mat4::new_identity(),
                 view: mat4::new_identity(),
+                world_matrix: mat4::new_identity(),
 
                 needs_update: true,
-                active: false,
+                active: true,
             }))
         }
     }
@@ -110,6 +113,9 @@ impl Camera {
         self.data.borrow_mut().active = active;
     }
 
+    pub fn active(&self) -> bool {
+        self.data.borrow().active
+    }
     pub fn set_active(&self) -> &Self {
         if let Some(camera_manager) = self.camera_manager() {
             camera_manager.set_active_camera(self.clone());
@@ -117,9 +123,6 @@ impl Camera {
             self.data.borrow_mut().active = true;
         }
         self
-    }
-    pub fn active(&self) -> bool {
-        self.data.borrow().active
     }
 
     pub fn auto_resize(&self) -> bool {
@@ -217,15 +220,28 @@ impl Camera {
     }
 
     pub fn view(&self) -> [f32; 16] {
-        self.update_view();
+        if let Some(world_matrix) = self.world_matrix() {
+            if world_matrix != self.data.borrow().world_matrix {
+                let mut data = self.data.borrow_mut();
+                mat4::copy(&mut data.world_matrix, &world_matrix);
+                mat4::inverse(&mut data.view, &world_matrix);
+            }
+        } else {
+            mat4::identity(&mut self.data.borrow_mut().view);
+        }
         self.data.borrow().view
     }
-    fn update_view(&self) {
+    fn world_matrix(&self) -> Option<[f32; 16]> {
         if let Some(entity) = self.entity() {
-            if let Some(transform2d) = entity.get_component::<Transform2D>() {
-                let mut data = self.data.borrow_mut();
-                mat4::inverse(&mut data.view, &mat4::from_mat32(&transform2d.matrix()));
+            if let Some(transform3d) = entity.get_component::<Transform3D>() {
+                Some(transform3d.world_matrix())
+            } else if let Some(transform2d) = entity.get_component::<Transform2D>() {
+                Some(transform2d.world_matrix())
+            } else {
+                None
             }
+        } else {
+            None
         }
     }
 
@@ -250,10 +266,12 @@ impl Camera {
             mat4::orthographic(&mut data.projection, left, right, top, bottom, near, far);
         } else {
             let mut data = self.data.borrow_mut();
+
             let fov = data.fov;
             let aspect = data.aspect;
             let near = data.near;
             let far = data.far;
+
             mat4::perspective(&mut data.projection, fov * TO_RADS, aspect, near, far);
         }
     }

@@ -17,5 +17,8 @@ git = "https://github.com/nathanfaucett/rs-scene_graph.git"
 [dependencies.transform2d_component]
 git = "https://github.com/nathanfaucett/rs-transform2d_component.git"
 
+[dependencies.transform3d_component]
+git = "https://github.com/nathanfaucett/rs-transform3d_component.git"
+
 [dependencies.mat4]
 git = "https://github.com/nathanfaucett/rs-mat4.git"

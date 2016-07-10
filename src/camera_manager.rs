@@ -1,4 +1,3 @@
-use collections::vec::Vec;
 use collections::boxed::Box;
 use alloc::arc::Arc;
 use core::cell::RefCell;
@@ -10,7 +9,7 @@ use camera::Camera;
 struct CameraManagerData {
     scene: Option<Scene>,
     active_camera: Option<Camera>,
-    components: Vec<Camera>,
+    components: usize,
 }
 
 
@@ -26,7 +25,7 @@ impl CameraManager {
             data: Arc::new(RefCell::new(CameraManagerData {
                 scene: None,
                 active_camera: None,
-                components: Vec::new(),
+                components: 0usize,
             }))
         }
     }
@@ -38,6 +37,7 @@ impl CameraManager {
             active_camera.__set_active(false);
         }
 
+        camera.__set_active(true);
         data.active_camera = Some(camera);
 
         self
@@ -66,7 +66,7 @@ impl ComponentManager for CameraManager {
 
     fn order(&self) -> usize { 0 }
     fn is_empty(&self) -> bool {
-        self.data.borrow().components.len() == 0
+        self.data.borrow().components == 0usize
     }
 
     fn destroy(&self) {}
@@ -82,18 +82,11 @@ impl ComponentManager for CameraManager {
             self.set_active_camera(component.clone());
         }
 
-        self.data.borrow_mut().components.push(component.clone());
+        self.data.borrow_mut().components += 1;
     }
     fn remove_component(&self, component: &Box<Component>) {
         let component = component.downcast_ref::<Camera>().unwrap();
-        let ref mut components = self.data.borrow_mut().components;
-
-        match components.iter().position(|c| *c == *component) {
-            Some(i) => {
-                component.set_camera_manager(None);
-                components.remove(i);
-            },
-            None => (),
-        }
+        self.data.borrow_mut().components -= 1;
+        component.set_camera_manager(None);
     }
 }
