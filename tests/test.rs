@@ -27,15 +27,15 @@ fn test_scene() {
     scene.add_entity(entity.clone());
 
     let camera_manager = scene.get_component_manager::<CameraManager>().unwrap();
-    let entity_camera = camera_manager.active_camera().unwrap();
+    let entity_camera = camera_manager.get_active_camera().unwrap();
 
-    assert!(entity_camera.view() == [
+    assert!(entity_camera.get_view() == [
         1f32, 0f32, 0f32, 0f32,
         0f32, 1f32, 0f32, 0f32,
         0f32, 0f32, 1f32, 0f32,
         -10f32, -10f32, 0f32, 1f32
     ]);
-    assert!(entity_camera.projection() == [
+    assert!(entity_camera.get_projection() == [
         3.1715946f32, 0f32, 0f32, 0f32,
         0f32, 3.1715946f32, 0f32, 0f32,
         0f32, 0f32, -1f32, -1f32,

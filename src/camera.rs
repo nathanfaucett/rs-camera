@@ -1,5 +1,5 @@
 use collections::boxed::Box;
-use alloc::arc::Arc;
+use alloc::rc::Rc;
 use core::cell::RefCell;
 use core::f32::EPSILON;
 use core::f32::consts::PI;
@@ -47,13 +47,13 @@ struct CameraData {
 
 #[derive(Clone)]
 pub struct Camera {
-    data: Arc<RefCell<CameraData>>,
+    data: Rc<RefCell<CameraData>>,
 }
 
 impl Camera {
     pub fn new() -> Self {
         Camera {
-            data: Arc::new(RefCell::new(CameraData {
+            data: Rc::new(RefCell::new(CameraData {
 
                 entity: None,
                 camera_manager: None,
@@ -85,7 +85,7 @@ impl Camera {
         }
     }
 
-    pub fn camera_manager(&self) -> Option<CameraManager> {
+    pub fn get_camera_manager(&self) -> Option<CameraManager> {
         self.data.borrow().camera_manager.clone()
     }
     pub fn set_camera_manager(&self, camera_manager: Option<CameraManager>) {
@@ -117,7 +117,7 @@ impl Camera {
         self.data.borrow().active
     }
     pub fn set_active(&self) -> &Self {
-        if let Some(camera_manager) = self.camera_manager() {
+        if let Some(camera_manager) = self.get_camera_manager() {
             camera_manager.set_active_camera(self.clone());
         } else {
             self.data.borrow_mut().active = true;
@@ -125,14 +125,14 @@ impl Camera {
         self
     }
 
-    pub fn auto_resize(&self) -> bool {
+    pub fn get_auto_resize(&self) -> bool {
         self.data.borrow().auto_resize
     }
     pub fn set_auto_resize(&self, auto_resize: bool) {
         self.data.borrow_mut().auto_resize = auto_resize;
     }
 
-    pub fn background(&self) -> [f32; 4] {
+    pub fn get_background(&self) -> [f32; 4] {
         self.data.borrow().background
     }
     pub fn set_background(&self, background: [f32; 4]) {
@@ -162,10 +162,10 @@ impl Camera {
         self
     }
 
-    pub fn width(&self) -> usize {
+    pub fn get_width(&self) -> usize {
         self.data.borrow().width
     }
-    pub fn height(&self) -> usize {
+    pub fn get_height(&self) -> usize {
         self.data.borrow().height
     }
 
@@ -175,7 +175,7 @@ impl Camera {
         data.needs_update = true;
         self
     }
-    pub fn fov(&self) -> f32 {
+    pub fn get_fov(&self) -> f32 {
         self.data.borrow().fov
     }
 
@@ -185,7 +185,7 @@ impl Camera {
         data.needs_update = true;
         self
     }
-    pub fn near(&self) -> f32 {
+    pub fn get_near(&self) -> f32 {
         self.data.borrow().near
     }
 
@@ -195,7 +195,7 @@ impl Camera {
         data.needs_update = true;
         self
     }
-    pub fn far(&self) -> f32 {
+    pub fn get_far(&self) -> f32 {
         self.data.borrow().far
     }
 
@@ -205,7 +205,7 @@ impl Camera {
         data.needs_update = true;
         self
     }
-    pub fn orthographic_mode(&self) -> bool {
+    pub fn get_orthographic_mode(&self) -> bool {
         self.data.borrow().orthographic_mode
     }
 
@@ -215,12 +215,12 @@ impl Camera {
         data.needs_update = true;
         self
     }
-    pub fn orthographic_size(&self) -> f32 {
+    pub fn get_orthographic_size(&self) -> f32 {
         self.data.borrow().orthographic_size
     }
 
-    pub fn view(&self) -> [f32; 16] {
-        if let Some(world_matrix) = self.world_matrix() {
+    pub fn get_view(&self) -> [f32; 16] {
+        if let Some(world_matrix) = self.get_world_matrix() {
             if world_matrix != self.data.borrow().world_matrix {
                 let mut data = self.data.borrow_mut();
                 mat4::copy(&mut data.world_matrix, &world_matrix);
@@ -231,12 +231,12 @@ impl Camera {
         }
         self.data.borrow().view
     }
-    fn world_matrix(&self) -> Option<[f32; 16]> {
-        if let Some(entity) = self.entity() {
+    fn get_world_matrix(&self) -> Option<[f32; 16]> {
+        if let Some(entity) = self.get_entity() {
             if let Some(transform3d) = entity.get_component::<Transform3D>() {
-                Some(transform3d.world_matrix())
+                Some(transform3d.get_world_matrix())
             } else if let Some(transform2d) = entity.get_component::<Transform2D>() {
-                Some(transform2d.world_matrix())
+                Some(transform2d.get_world_matrix())
             } else {
                 None
             }
@@ -245,14 +245,14 @@ impl Camera {
         }
     }
 
-    pub fn projection(&self) -> [f32; 16] {
+    pub fn get_projection(&self) -> [f32; 16] {
         if self.data.borrow().needs_update {
             self.update_projection();
         }
         self.data.borrow().projection
     }
     fn update_projection(&self) {
-        if self.orthographic_mode() {
+        if self.get_orthographic_mode() {
             let mut data = self.data.borrow_mut();
 
             let orthographic_size = data.orthographic_size;
@@ -278,16 +278,16 @@ impl Camera {
 }
 
 impl Component for Camera {
-    fn id(&self) -> Id {
+    fn get_id(&self) -> Id {
         Id::of::<Camera>()
     }
     fn new_component_manager(&self) -> Box<ComponentManager> {
         Box::new(CameraManager::new())
     }
-    fn component_manager_id(&self) -> Id {
+    fn get_component_manager_id(&self) -> Id {
         Id::of::<CameraManager>()
     }
-    fn entity(&self) -> Option<Entity> {
+    fn get_entity(&self) -> Option<Entity> {
         self.data.borrow().entity.clone()
     }
     fn set_entity(&self, entity: Option<Entity>) {

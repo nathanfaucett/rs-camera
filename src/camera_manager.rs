@@ -1,5 +1,5 @@
 use collections::boxed::Box;
-use alloc::arc::Arc;
+use alloc::rc::Rc;
 use core::cell::RefCell;
 
 use scene_graph::{Scene, Component, ComponentManager, Id};
@@ -15,14 +15,14 @@ struct CameraManagerData {
 
 #[derive(Clone)]
 pub struct CameraManager {
-    data: Arc<RefCell<CameraManagerData>>,
+    data: Rc<RefCell<CameraManagerData>>,
 }
 
 impl CameraManager {
 
     pub fn new() -> CameraManager {
         CameraManager {
-            data: Arc::new(RefCell::new(CameraManagerData {
+            data: Rc::new(RefCell::new(CameraManagerData {
                 scene: None,
                 active_camera: None,
                 components: 0usize,
@@ -42,7 +42,7 @@ impl CameraManager {
 
         self
     }
-    pub fn active_camera(&self) -> Option<Camera> {
+    pub fn get_active_camera(&self) -> Option<Camera> {
         match self.data.borrow().active_camera {
             Some(ref active_camera) => Some(active_camera.clone()),
             None => None,
@@ -52,9 +52,9 @@ impl CameraManager {
 
 impl ComponentManager for CameraManager {
 
-    fn id(&self) -> Id { Id::of::<CameraManager>() }
+    fn get_id(&self) -> Id { Id::of::<CameraManager>() }
 
-    fn scene(&self) -> Option<Scene> {
+    fn get_scene(&self) -> Option<Scene> {
         match self.data.borrow().scene {
             Some(ref scene) => Some(scene.clone()),
             None => None,
@@ -64,7 +64,7 @@ impl ComponentManager for CameraManager {
         self.data.borrow_mut().scene = scene;
     }
 
-    fn order(&self) -> usize { 0 }
+    fn get_order(&self) -> usize { 0 }
     fn is_empty(&self) -> bool {
         self.data.borrow().components == 0usize
     }
