@@ -1,7 +1,6 @@
 use collections::boxed::Box;
-use alloc::rc::Rc;
-use core::cell::RefCell;
 
+use shared::Shared;
 use scene_graph::{Scene, Component, ComponentManager, Id};
 use camera::Camera;
 
@@ -15,35 +14,33 @@ struct CameraManagerData {
 
 #[derive(Clone)]
 pub struct CameraManager {
-    data: Rc<RefCell<CameraManagerData>>,
+    data: Shared<CameraManagerData>,
 }
 
 impl CameraManager {
 
     pub fn new() -> CameraManager {
         CameraManager {
-            data: Rc::new(RefCell::new(CameraManagerData {
+            data: Shared::new(CameraManagerData {
                 scene: None,
                 active_camera: None,
                 components: 0usize,
-            }))
+            })
         }
     }
 
-    pub fn set_active_camera(&self, camera: Camera) -> &Self {
-        let mut data = self.data.borrow_mut();
-
-        if let Some(ref active_camera) = data.active_camera {
+    pub fn set_active_camera(&mut self, camera: &mut Camera) -> &Self {
+        if let Some(ref mut active_camera) = self.data.active_camera {
             active_camera.__set_active(false);
         }
 
         camera.__set_active(true);
-        data.active_camera = Some(camera);
+        self.data.active_camera = Some(camera.clone());
 
         self
     }
     pub fn get_active_camera(&self) -> Option<Camera> {
-        match self.data.borrow().active_camera {
+        match self.data.active_camera {
             Some(ref active_camera) => Some(active_camera.clone()),
             None => None,
         }
@@ -55,38 +52,38 @@ impl ComponentManager for CameraManager {
     fn get_id(&self) -> Id { Id::of::<CameraManager>() }
 
     fn get_scene(&self) -> Option<Scene> {
-        match self.data.borrow().scene {
+        match self.data.scene {
             Some(ref scene) => Some(scene.clone()),
             None => None,
         }
     }
-    fn set_scene(&self, scene: Option<Scene>) {
-        self.data.borrow_mut().scene = scene;
+    fn set_scene(&mut self, scene: Option<Scene>) {
+        self.data.scene = scene;
     }
 
     fn get_order(&self) -> usize { 0 }
     fn is_empty(&self) -> bool {
-        self.data.borrow().components == 0usize
+        self.data.components == 0usize
     }
 
-    fn destroy(&self) {}
-    fn init(&self) {}
-    fn update(&self) {}
+    fn clear(&mut self) {}
+    fn init(&mut self) {}
+    fn update(&mut self) {}
 
-    fn add_component(&self, component: &Box<Component>) {
-        let component = component.downcast_ref::<Camera>().unwrap();
+    fn add_component(&mut self, component: &mut Box<Component>) {
+        let ref mut component = component.downcast_mut::<Camera>().unwrap();
 
         component.set_camera_manager(Some(self.clone()));
 
         if component.active() {
-            self.set_active_camera(component.clone());
+            self.set_active_camera(component);
         }
 
-        self.data.borrow_mut().components += 1;
+        self.data.components += 1;
     }
-    fn remove_component(&self, component: &Box<Component>) {
-        let component = component.downcast_ref::<Camera>().unwrap();
-        self.data.borrow_mut().components -= 1;
+    fn remove_component(&mut self, component: &mut Box<Component>) {
+        let mut component = component.downcast_mut::<Camera>().unwrap();
+        self.data.components -= 1;
         component.set_camera_manager(None);
     }
 }

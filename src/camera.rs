@@ -1,12 +1,11 @@
 use collections::boxed::Box;
-use alloc::rc::Rc;
-use core::cell::RefCell;
 use core::f32::EPSILON;
 use core::f32::consts::PI;
 
+use shared::Shared;
+
 use mat4;
-use transform2d_component::Transform2D;
-use transform3d_component::Transform3D;
+use transform_components::{Transform2D, Transform3D};
 use scene_graph::{Entity, Component, ComponentManager, Id};
 use camera_manager::CameraManager;
 
@@ -38,7 +37,6 @@ struct CameraData {
 
     projection: [f32; 16],
     view: [f32; 16],
-    world_matrix: [f32; 16],
 
     needs_update: bool,
     active: bool,
@@ -47,13 +45,13 @@ struct CameraData {
 
 #[derive(Clone)]
 pub struct Camera {
-    data: Rc<RefCell<CameraData>>,
+    data: Shared<CameraData>,
 }
 
 impl Camera {
     pub fn new() -> Self {
         Camera {
-            data: Rc::new(RefCell::new(CameraData {
+            data: Shared::new(CameraData {
 
                 entity: None,
                 camera_manager: None,
@@ -77,165 +75,175 @@ impl Camera {
 
                 projection: mat4::new_identity(),
                 view: mat4::new_identity(),
-                world_matrix: mat4::new_identity(),
 
                 needs_update: true,
                 active: true,
-            }))
+            })
         }
     }
 
     pub fn get_camera_manager(&self) -> Option<CameraManager> {
-        self.data.borrow().camera_manager.clone()
+        self.data.camera_manager.clone()
     }
-    pub fn set_camera_manager(&self, camera_manager: Option<CameraManager>) {
-        self.data.borrow_mut().camera_manager = camera_manager;
+    pub fn set_camera_manager(&mut self, camera_manager: Option<CameraManager>) {
+        self.data.camera_manager = camera_manager;
     }
 
-    pub fn set(&self, width: usize, height: usize) -> &Self {
-        let mut data = self.data.borrow_mut();
-        let fwidth = width as f32;
-        let fheight = height as f32;
+    pub fn set(&mut self, width: usize, height: usize) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            let fwidth = width as f32;
+            let fheight = height as f32;
 
-        data.width = width;
-        data.height = height;
+            data.width = width;
+            data.height = height;
 
-        data.inv_width = 1f32 / fwidth;
-        data.inv_height = 1f32 / fheight;
+            data.inv_width = 1f32 / fwidth;
+            data.inv_height = 1f32 / fheight;
 
-        data.aspect = fwidth / fheight;
-        data.needs_update = true;
-
+            data.aspect = fwidth / fheight;
+            data.needs_update = true;
+        }
         self
     }
 
-    pub fn __set_active(&self, active: bool) {
-        self.data.borrow_mut().active = active;
+    pub fn __set_active(&mut self, active: bool) {
+        self.data.active = active;
     }
 
     pub fn active(&self) -> bool {
-        self.data.borrow().active
+        self.data.active
     }
-    pub fn set_active(&self) -> &Self {
-        if let Some(camera_manager) = self.get_camera_manager() {
-            camera_manager.set_active_camera(self.clone());
+    pub fn set_active(&mut self) -> &Self {
+        if let Some(ref mut camera_manager) = self.get_camera_manager() {
+            camera_manager.set_active_camera(self);
         } else {
-            self.data.borrow_mut().active = true;
+            self.data.active = true;
         }
         self
     }
 
     pub fn get_auto_resize(&self) -> bool {
-        self.data.borrow().auto_resize
+        self.data.auto_resize
     }
-    pub fn set_auto_resize(&self, auto_resize: bool) {
-        self.data.borrow_mut().auto_resize = auto_resize;
+    pub fn set_auto_resize(&mut self, auto_resize: bool) {
+        self.data.auto_resize = auto_resize;
     }
 
     pub fn get_background(&self) -> [f32; 4] {
-        self.data.borrow().background
+        self.data.background
     }
-    pub fn set_background(&self, background: [f32; 4]) {
-        self.data.borrow_mut().background = background;
+    pub fn set_background(&mut self, background: [f32; 4]) {
+        self.data.background = background;
     }
 
-    pub fn set_width(&self, width: usize) -> &Self {
-        let mut data = self.data.borrow_mut();
-        let fwidth = width as f32;
+    pub fn set_width(&mut self, width: usize) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            let fwidth = width as f32;
 
-        data.width = width;
-        data.inv_width = 1f32 / fwidth;
-        data.aspect = fwidth / data.height as f32;
-        data.needs_update = true;
-
+            data.width = width;
+            data.inv_width = 1f32 / fwidth;
+            data.aspect = fwidth / data.height as f32;
+            data.needs_update = true;
+        }
         self
     }
-    pub fn set_height(&self, height: usize) -> &Self {
-        let mut data = self.data.borrow_mut();
-        let fheight = height as f32;
+    pub fn set_height(&mut self, height: usize) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            let fheight = height as f32;
 
-        data.height = height;
-        data.inv_height = 1f32 / fheight;
-        data.aspect = fheight / data.height as f32;
-        data.needs_update = true;
-
+            data.height = height;
+            data.inv_height = 1f32 / fheight;
+            data.aspect = fheight / data.height as f32;
+            data.needs_update = true;
+        }
         self
     }
 
     pub fn get_width(&self) -> usize {
-        self.data.borrow().width
+        self.data.width
     }
     pub fn get_height(&self) -> usize {
-        self.data.borrow().height
+        self.data.height
     }
 
-    pub fn set_fov(&self, fov: f32) -> &Self {
-        let mut data = self.data.borrow_mut();
-        data.fov = fov;
-        data.needs_update = true;
+    pub fn set_fov(&mut self, fov: f32) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            data.fov = fov;
+            data.needs_update = true;
+        }
         self
     }
     pub fn get_fov(&self) -> f32 {
-        self.data.borrow().fov
+        self.data.fov
     }
 
-    pub fn set_near(&self, near: f32) -> &Self {
-        let mut data = self.data.borrow_mut();
-        data.near = near;
-        data.needs_update = true;
+    pub fn set_near(&mut self, near: f32) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            data.near = near;
+            data.needs_update = true;
+        }
         self
     }
     pub fn get_near(&self) -> f32 {
-        self.data.borrow().near
+        self.data.near
     }
 
-    pub fn set_far(&self, far: f32) -> &Self {
-        let mut data = self.data.borrow_mut();
-        data.far = far;
-        data.needs_update = true;
+    pub fn set_far(&mut self, far: f32) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            data.far = far;
+            data.needs_update = true;
+        }
         self
     }
     pub fn get_far(&self) -> f32 {
-        self.data.borrow().far
+        self.data.far
     }
 
-    pub fn set_orthographic_mode(&self, orthographic_mode: bool) -> &Self {
-        let mut data = self.data.borrow_mut();
-        data.orthographic_mode = orthographic_mode;
-        data.needs_update = true;
+    pub fn set_orthographic_mode(&mut self, orthographic_mode: bool) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            data.orthographic_mode = orthographic_mode;
+            data.needs_update = true;
+        }
         self
     }
     pub fn get_orthographic_mode(&self) -> bool {
-        self.data.borrow().orthographic_mode
+        self.data.orthographic_mode
     }
 
-    pub fn set_orthographic_size(&self, orthographic_size: f32) -> &Self {
-        let mut data = self.data.borrow_mut();
-        data.orthographic_size = if orthographic_size > 0f32 {orthographic_size} else {EPSILON};
-        data.needs_update = true;
+    pub fn set_orthographic_size(&mut self, orthographic_size: f32) -> &mut Self {
+        {
+            let ref mut data = self.data;
+            data.orthographic_size = if orthographic_size > 0f32 {orthographic_size} else {EPSILON};
+            data.needs_update = true;
+        }
         self
     }
     pub fn get_orthographic_size(&self) -> f32 {
-        self.data.borrow().orthographic_size
+        self.data.orthographic_size
     }
 
-    pub fn get_view(&self) -> [f32; 16] {
-        if let Some(world_matrix) = self.get_world_matrix() {
-            if world_matrix != self.data.borrow().world_matrix {
-                let mut data = self.data.borrow_mut();
-                mat4::copy(&mut data.world_matrix, &world_matrix);
-                mat4::inverse(&mut data.view, &world_matrix);
-            }
+    pub fn get_view(&mut self) -> &[f32; 16] {
+        let world_matrix = self.get_world_matrix();
+
+        if world_matrix.is_some() {
+            mat4::inverse(&mut self.data.view, &world_matrix.unwrap());
         } else {
-            mat4::identity(&mut self.data.borrow_mut().view);
+            mat4::identity(&mut self.data.view);
         }
-        self.data.borrow().view
+        &self.data.view
     }
     fn get_world_matrix(&self) -> Option<[f32; 16]> {
         if let Some(entity) = self.get_entity() {
-            if let Some(transform3d) = entity.get_component::<Transform3D>() {
-                Some(transform3d.get_world_matrix())
-            } else if let Some(transform2d) = entity.get_component::<Transform2D>() {
+            if let Some(ref mut transform3d) = entity.get_component::<Transform3D>() {
+                Some(*(transform3d.get_world_matrix()))
+            } else if let Some(ref mut transform2d) = entity.get_component::<Transform2D>() {
                 Some(transform2d.get_world_matrix())
             } else {
                 None
@@ -245,15 +253,15 @@ impl Camera {
         }
     }
 
-    pub fn get_projection(&self) -> [f32; 16] {
-        if self.data.borrow().needs_update {
+    pub fn get_projection(&mut self) -> &[f32; 16] {
+        if self.data.needs_update {
             self.update_projection();
         }
-        self.data.borrow().projection
+        &self.data.projection
     }
-    fn update_projection(&self) {
+    fn update_projection(&mut self) {
         if self.get_orthographic_mode() {
-            let mut data = self.data.borrow_mut();
+            let ref mut data = self.data;
 
             let orthographic_size = data.orthographic_size;
             let right = orthographic_size * data.aspect;
@@ -265,7 +273,7 @@ impl Camera {
 
             mat4::orthographic(&mut data.projection, left, right, top, bottom, near, far);
         } else {
-            let mut data = self.data.borrow_mut();
+            let ref mut data = self.data;
 
             let fov = data.fov;
             let aspect = data.aspect;
@@ -288,16 +296,16 @@ impl Component for Camera {
         Id::of::<CameraManager>()
     }
     fn get_entity(&self) -> Option<Entity> {
-        self.data.borrow().entity.clone()
+        self.data.entity.clone()
     }
-    fn set_entity(&self, entity: Option<Entity>) {
-        self.data.borrow_mut().entity = entity;
+    fn set_entity(&mut self, entity: Option<Entity>) {
+        self.data.entity = entity;
     }
 }
 
 impl PartialEq<Camera> for Camera {
     fn eq(&self, other: &Camera) -> bool {
-        (&*self.data.borrow() as *const _) == (&*other.data.borrow() as *const _)
+        (&*self.data as *const _) == (&*other.data as *const _)
     }
     fn ne(&self, other: &Camera) -> bool {
         !self.eq(other)

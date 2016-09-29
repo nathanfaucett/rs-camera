@@ -1,14 +1,13 @@
 #![no_std]
-#![feature(collections, alloc)]
+#![feature(collections)]
 
 
-extern crate alloc;
 extern crate collections;
 
+extern crate shared;
 extern crate mat4;
 extern crate scene_graph;
-extern crate transform2d_component;
-extern crate transform3d_component;
+extern crate transform_components;
 
 
 mod camera;
