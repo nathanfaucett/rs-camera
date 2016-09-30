@@ -1,8 +1,8 @@
+#![feature(alloc)]
 #![no_std]
-#![feature(collections)]
 
 
-extern crate collections;
+extern crate alloc;
 
 extern crate shared;
 extern crate mat4;

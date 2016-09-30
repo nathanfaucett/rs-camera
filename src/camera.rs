@@ -1,4 +1,5 @@
-use collections::boxed::Box;
+use alloc::boxed::Box;
+
 use core::f32::EPSILON;
 use core::f32::consts::PI;
 
