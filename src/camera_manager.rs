@@ -2,6 +2,7 @@ use alloc::boxed::Box;
 
 use shared::Shared;
 use scene_graph::{Scene, Component, ComponentManager, Id};
+
 use camera::Camera;
 
 

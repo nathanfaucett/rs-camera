@@ -4,10 +4,10 @@ use core::f32::EPSILON;
 use core::f32::consts::PI;
 
 use shared::Shared;
-
 use mat4;
 use transform_components::{Transform2D, Transform3D};
 use scene_graph::{Entity, Component, ComponentManager, Id};
+
 use camera_manager::CameraManager;
 
 
