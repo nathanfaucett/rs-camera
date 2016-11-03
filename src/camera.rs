@@ -131,8 +131,8 @@ impl Camera {
         self.data.auto_resize = auto_resize;
     }
 
-    pub fn get_background(&self) -> [f32; 4] {
-        self.data.background
+    pub fn get_background(&self) -> &[f32; 4] {
+        &self.data.background
     }
     pub fn set_background(&mut self, background: [f32; 4]) {
         self.data.background = background;
