@@ -134,8 +134,8 @@ impl Camera {
     pub fn get_background(&self) -> &[f32; 4] {
         &self.data.background
     }
-    pub fn set_background(&mut self, background: [f32; 4]) {
-        self.data.background = background;
+    pub fn set_background(&mut self, background: &[f32; 4]) {
+        self.data.background = *background;
     }
 
     pub fn set_width(&mut self, width: usize) -> &mut Self {

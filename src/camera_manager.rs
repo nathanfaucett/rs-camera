@@ -46,6 +46,9 @@ impl CameraManager {
             None => None,
         }
     }
+    pub fn has_active_camera(&self) -> bool {
+        self.data.active_camera.is_some()
+    }
 }
 
 impl ComponentManager for CameraManager {
@@ -76,7 +79,7 @@ impl ComponentManager for CameraManager {
 
         component.set_camera_manager(Some(self.clone()));
 
-        if component.active() {
+        if component.active() || !self.has_active_camera() {
             self.set_active_camera(component);
         }
 
@@ -84,7 +87,11 @@ impl ComponentManager for CameraManager {
     }
     fn remove_component(&mut self, component: &mut Box<Component>) {
         let mut component = component.downcast_mut::<Camera>().unwrap();
+
         self.data.components -= 1;
-        component.set_camera_manager(None);
+
+        if component.active() {
+            component.set_camera_manager(None);
+        }
     }
 }
