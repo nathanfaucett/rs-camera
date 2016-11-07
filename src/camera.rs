@@ -157,7 +157,7 @@ impl Camera {
 
             data.height = height;
             data.inv_height = 1f32 / fheight;
-            data.aspect = fheight / data.height as f32;
+            data.aspect = data.width as f32 / fheight;
             data.needs_update = true;
         }
         self
