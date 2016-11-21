@@ -1,14 +1,14 @@
 [package]
-name = "camera_component"
+name = "camera_components"
 version = "0.1.0"
 authors = ["nathanfaucett <nathanfaucett@gmail.com>"]
 
-keywords = ["camera_component"]
-description = "camera component and manager for the scene_graph lib"
+keywords = ["camera_components"]
+description = "camera3d component and manager for the scene_graph lib"
 license = "MIT"
 readme = "README.md"
-repository = "https://github.com/nathanfaucett/rs-camera_component.git"
-homepage = "https://github.com/nathanfaucett/rs-camera_component"
+repository = "https://github.com/nathanfaucett/rs-camera_components.git"
+homepage = "https://github.com/nathanfaucett/rs-camera_components"
 
 
 [dependencies.scene_graph]
@@ -20,5 +20,9 @@ git = "https://github.com/nathanfaucett/rs-shared.git"
 [dependencies.transform_components]
 git = "https://github.com/nathanfaucett/rs-transform_components.git"
 
+[dependencies.to_radians]
+git = "https://github.com/nathanfaucett/rs-to_radians.git"
+[dependencies.mat32]
+git = "https://github.com/nathanfaucett/rs-mat32.git"
 [dependencies.mat4]
 git = "https://github.com/nathanfaucett/rs-mat4.git"

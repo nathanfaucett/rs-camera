@@ -1,23 +1,20 @@
 use alloc::boxed::Box;
 
 use core::f32::EPSILON;
-use core::f32::consts::PI;
 
 use shared::Shared;
 use mat4;
+use to_radians::ToRadians;
 use transform_components::{Transform2D, Transform3D};
 use scene_graph::{Entity, Component, ComponentManager, Id};
 
-use camera_manager::CameraManager;
+use camera3d_manager::Camera3DManager;
 
 
-static TO_RADS: f32 = PI / 180f32;
-
-
-struct CameraData {
+struct Camera3DData {
 
     entity: Option<Entity>,
-    camera_manager: Option<CameraManager>,
+    camera_manager: Option<Camera3DManager>,
 
     width: usize,
     height: usize,
@@ -45,14 +42,14 @@ struct CameraData {
 
 
 #[derive(Clone)]
-pub struct Camera {
-    data: Shared<CameraData>,
+pub struct Camera3D {
+    data: Shared<Camera3DData>,
 }
 
-impl Camera {
+impl Camera3D {
     pub fn new() -> Self {
-        Camera {
-            data: Shared::new(CameraData {
+        Camera3D {
+            data: Shared::new(Camera3DData {
 
                 entity: None,
                 camera_manager: None,
@@ -83,10 +80,10 @@ impl Camera {
         }
     }
 
-    pub fn get_camera_manager(&self) -> Option<CameraManager> {
+    pub fn get_manager(&self) -> Option<Camera3DManager> {
         self.data.camera_manager.clone()
     }
-    pub fn set_camera_manager(&mut self, camera_manager: Option<CameraManager>) {
+    pub fn __set_manager(&mut self, camera_manager: Option<Camera3DManager>) {
         self.data.camera_manager = camera_manager;
     }
 
@@ -116,7 +113,7 @@ impl Camera {
         self.data.active
     }
     pub fn set_active(&mut self) -> &Self {
-        if let Some(ref mut camera_manager) = self.get_camera_manager() {
+        if let Some(ref mut camera_manager) = self.get_manager() {
             camera_manager.set_active_camera(self);
         } else {
             self.data.active = true;
@@ -281,20 +278,20 @@ impl Camera {
             let near = data.near;
             let far = data.far;
 
-            mat4::perspective(&mut data.projection, fov * TO_RADS, aspect, near, far);
+            mat4::perspective(&mut data.projection, fov.to_radians(), aspect, near, far);
         }
     }
 }
 
-impl Component for Camera {
+impl Component for Camera3D {
     fn get_id(&self) -> Id {
-        Id::of::<Camera>()
+        Id::of::<Camera3D>()
     }
     fn new_component_manager(&self) -> Box<ComponentManager> {
-        Box::new(CameraManager::new())
+        Box::new(Camera3DManager::new())
     }
     fn get_component_manager_id(&self) -> Id {
-        Id::of::<CameraManager>()
+        Id::of::<Camera3DManager>()
     }
     fn get_entity(&self) -> Option<Entity> {
         self.data.entity.clone()
@@ -304,11 +301,11 @@ impl Component for Camera {
     }
 }
 
-impl PartialEq<Camera> for Camera {
-    fn eq(&self, other: &Camera) -> bool {
+impl PartialEq<Camera3D> for Camera3D {
+    fn eq(&self, other: &Camera3D) -> bool {
         (&*self.data as *const _) == (&*other.data as *const _)
     }
-    fn ne(&self, other: &Camera) -> bool {
+    fn ne(&self, other: &Camera3D) -> bool {
         !self.eq(other)
     }
 }
