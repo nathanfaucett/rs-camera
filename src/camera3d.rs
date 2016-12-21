@@ -277,7 +277,7 @@ impl Camera3D {
             let aspect = data.aspect;
             let near = data.near;
             let far = data.far;
-
+            
             mat4::perspective(&mut data.projection, fov.to_radians(), aspect, near, far);
         }
     }

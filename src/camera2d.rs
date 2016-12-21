@@ -4,7 +4,6 @@ use core::f32::EPSILON;
 
 use shared::Shared;
 use mat32;
-use to_radians::ToRadians;
 use transform_components::{Transform2D, Transform3D};
 use scene_graph::{Entity, Component, ComponentManager, Id};
 
