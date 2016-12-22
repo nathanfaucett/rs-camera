@@ -1,7 +1,5 @@
 use alloc::boxed::Box;
 
-use core::f32::EPSILON;
-
 use shared::Shared;
 use mat4;
 use to_radians::ToRadians;
@@ -68,8 +66,8 @@ impl Camera3D {
                 orthographic_mode: false,
                 orthographic_size: 2f32,
 
-                near: EPSILON,
-                far: 1024f32,
+                near: 0.001f32,
+                far: 1000f32,
 
                 projection: mat4::new_identity(),
                 view: mat4::new_identity(),
@@ -182,7 +180,9 @@ impl Camera3D {
     pub fn set_near(&mut self, near: f32) -> &mut Self {
         {
             let ref mut data = self.data;
-            data.near = near;
+            if near >= 0.0001f32 {
+                data.near = near;
+            }
             data.needs_update = true;
         }
         self
@@ -218,7 +218,7 @@ impl Camera3D {
     pub fn set_orthographic_size(&mut self, orthographic_size: f32) -> &mut Self {
         {
             let ref mut data = self.data;
-            data.orthographic_size = if orthographic_size > 0f32 {orthographic_size} else {EPSILON};
+            data.orthographic_size = if orthographic_size > 0.0001f32 {orthographic_size} else {0.0001f32};
             data.needs_update = true;
         }
         self
@@ -277,7 +277,7 @@ impl Camera3D {
             let aspect = data.aspect;
             let near = data.near;
             let far = data.far;
-            
+
             mat4::perspective(&mut data.projection, fov.to_radians(), aspect, near, far);
         }
     }
